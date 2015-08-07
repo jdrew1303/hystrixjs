@@ -1,0 +1,28 @@
+{
+  "name": "hystrix",
+  "version": "0.0.1",
+  "description": "resilience module for NodeJS applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "express": "^4.13.3",
+    "fast-stats": "0.0.3",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.0",
+    "gulp-jasmine": "^2.0.1",
+    "gulp-plumber": "^1.0.1",
+    "http": "0.0.0",
+    "jasmine": "^2.3.1",
+    "jasmine-core": "^2.3.4",
+    "lodash": "^3.10.1",
+    "minimist": "^1.1.2",
+    "q": "^1.4.1",
+    "request": "^2.60.0",
+    "request-promise-json": "^1.0.4",
+    "rx": "^3.0.0"
+  }
+}

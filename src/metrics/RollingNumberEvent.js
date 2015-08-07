@@ -1,0 +1,6 @@
+export default {
+    SUCCESS: "SUCCESS",
+    FAILURE: "FAILURE",
+    TIMEOUT: "TIMEOUT",
+    SHORT_CIRCUITED: "SHORT_CIRCUITED"
+};
