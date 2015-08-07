@@ -9,7 +9,7 @@ export default class Command {
             commandGroup,
             runContext,
             timeout = 0,
-            fallback = function(error) {return Promise.reject(error);},
+            fallback = function(error) {return q.reject(error);},
             run = function() {throw new Error("Command must implement run method.")},
             isErrorHandler = function(error) {return error;}
         }) {
@@ -52,7 +52,7 @@ export default class Command {
                 return this.handleSuccess(start, args);
             }
         )
-        .catch(err => {
+        .fail(err => {
                 return this.handleFailure(err);
             }
         )
