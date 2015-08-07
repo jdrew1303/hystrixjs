@@ -48,9 +48,8 @@ export default class Command {
         }
 
         return promise
-        .then(() => {
-                var args = Array.prototype.slice.call(arguments);
-                return this.handleSuccess(start, arguments);
+        .then((...args) => {
+                return this.handleSuccess(start, args);
             }
         )
         .catch(err => {

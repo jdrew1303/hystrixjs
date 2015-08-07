@@ -27,6 +27,10 @@ class RollingNumber {
         }
 
         let currentBucket = this.buckets[this.buckets.length-1];
+        if (currentTime > (currentBucket.windowStart + this.windowLength)) {
+            this.reset();
+            return this.getCurrentBucket();
+        }
         if (currentTime < (currentBucket.windowStart + this.bucketSizeInMilliseconds)) {
             return currentBucket;
         } else {
