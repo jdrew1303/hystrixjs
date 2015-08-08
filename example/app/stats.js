@@ -1,7 +1,6 @@
 var express = require('express'),
     hystrixStream = require('../../lib/http/HystrixSSEStream'),
     _ = require('lodash');
-require('longjohn');
 
 module.exports = function(config) {
     

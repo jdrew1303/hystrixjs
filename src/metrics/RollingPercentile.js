@@ -4,9 +4,9 @@ import {Stats} from "fast-stats";
 
 export default class RollingPercentile {
 
-    constructor({timeInMillisecond = 10000, bucketsLength = 10} = {}) {
+    constructor({timeInMillisecond = 10000, numberOfBuckets = 10} = {}) {
         this.windowLength = timeInMillisecond;
-        this.numberOfBuckets = bucketsLength;
+        this.numberOfBuckets = numberOfBuckets;
         this.buckets = [];
         this.percentileSnapshot = new PercentileSnapshot();
     }

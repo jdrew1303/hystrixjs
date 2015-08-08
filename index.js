@@ -1,3 +1,5 @@
 module.exports = {
-   commandFactory: require("./lib/command/CommandFactory")
+   commandFactory: require("./lib/command/CommandFactory"),
+   metricsFactory: require("./lib/metrics/CommandMetrics").Factory,
+   circuitFactory: require("./lib/command/CircuitBreaker")
 };

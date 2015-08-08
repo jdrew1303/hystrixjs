@@ -36,7 +36,7 @@ describe("HystrixSSEStream", function() {
             var stream = HystrixSSEStream.toObservable();
             var subscription = stream.subscribe(
                 function(next) {
-                    console.log(next);
+                    subscription.dispose();
                 }
             );
         }, 1001);

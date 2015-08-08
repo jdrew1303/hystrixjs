@@ -28,12 +28,28 @@ describe ("CircuitBreaker", function() {
         expect(CircuitBreakerFactory.getCache().size).toBe(2);
     });
 
-    it("should close circuit if error threshold is greater than error percentage", function() {
+    it("should open circuit if error threshold is greater than error percentage", function() {
         var options = getCBOptions("Test");
         var cb = CircuitBreakerFactory.getInstance(options);
         var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
+        expect(cb.isOpen()).toBeTruthy();
+    });
+
+    it("should not open circuit if the volume is not reached threshold", function() {
+        var options = getCBOptions("Test");
+        options.circuitBreakerRequestVolumeThreshold =2;
+        var cb = CircuitBreakerFactory.getInstance(options);
+        var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
+        metrics.markSuccess();
+        metrics.markFailure();
+        expect(cb.isOpen()).toBeFalsy();
+
+        metrics.incrementExecutionCount();
+        metrics.incrementExecutionCount();
+        metrics.incrementExecutionCount();
+
         expect(cb.isOpen()).toBeTruthy();
     });
 

@@ -90,7 +90,7 @@ var services = [{
         ServiceUnavailableError: 0
     },
     calls: 6,
-    sleep: 200
+    sleep: 1200
 }, {
     port: opts.SERVICE_PORT_3,
     timeout: 1300,
