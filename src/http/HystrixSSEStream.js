@@ -2,7 +2,7 @@ import {Factory as CommandMetricsFactory} from "../metrics/CommandMetrics";
 import CircuitBreakFactory from "../command/CircuitBreaker";
 import rx from "rx";
 import ActualTime from "../util/ActualTime";
-import RollincNumberEvent from "../metrics/RollingNumberEvent";
+import RollingNumberEvent from "../metrics/RollingNumberEvent";
 
 export default class HystrixSSEStream {
     static toObservable() {
@@ -33,10 +33,10 @@ export default class HystrixSSEStream {
         json.errorCount = errorCount;
         json.requestCount = totalCount;
 
-        json.rollingCountFailure = metrics.getRollingCount(RollincNumberEvent.FAILURE);
-        json.rollingCountTimeout = metrics.getRollingCount(RollincNumberEvent.TIMEOUT);
-        json.rollingCountSuccess = metrics.getRollingCount(RollincNumberEvent.SUCCESS);
-        json.rollingCountShortCircuited = metrics.getRollingCount(RollincNumberEvent.SHORT_CIRCUITED);
+        json.rollingCountFailure = metrics.getRollingCount(RollingNumberEvent.FAILURE);
+        json.rollingCountTimeout = metrics.getRollingCount(RollingNumberEvent.TIMEOUT);
+        json.rollingCountSuccess = metrics.getRollingCount(RollingNumberEvent.SUCCESS);
+        json.rollingCountShortCircuited = metrics.getRollingCount(RollingNumberEvent.SHORT_CIRCUITED);
         json.rollingCountBadRequests = json.rollingCountFailure;
         json.rollingCountCollapsedRequests = 0;
         json.rollingCountExceptionsThrown = 0;

@@ -95,23 +95,6 @@ module.exports = function(port) {
         process.title = 'node (app:' + port + ')';
         app.listen(port, function() {
             var start = Date.now();
-    
-            //var observer = new CBObserver();
-            //cbs.forEach(function(cb) {
-            //    observer.watch(cb);
-            //});
-            
-            //var ioClient = require('socket.io-client');
-            //setTimeout(function() {
-            //    var socket = ioClient.connect('http://localhost:' + statsPort);
-            //    socket.on('connect', function() {
-            //        console.log("Connected to stats server");
-            //        observer.on('batch', function(data) {
-            //            socket.emit('circuit-breakers', data);
-            //        });
-            //    });
-            //}, 1000);
-
             console.log("[%d] APP Listening on %d", process.pid, port);
             setInterval(function() {
                 var elapsed = (Date.now() - start) / 1000;
