@@ -7,7 +7,7 @@ class CircuitBreaker {
             commandKey: key,
             commandGroup: group,
             circuitBreakerErrorThresholdPercentage: errorThreshold,
-            circuitBreakerRequestVolumeThreshold: volumeThreshold = 5
+            circuitBreakerRequestVolumeThreshold: volumeThreshold
         }) {
         this.circuitBreakerSleepWindowInMilliseconds = sleep;
         this.commandKey = key;
@@ -78,7 +78,13 @@ export default class Factory {
             return previouslyCached
         }
 
-        let circuitBreaker = new CircuitBreaker(arguments[0]);
+        let circuitBreaker = new CircuitBreaker({
+            circuitBreakerSleepWindowInMilliseconds: circuitBreakerSleepWindowInMilliseconds,
+            commandKey: commandKey,
+            circuitBreakerErrorThresholdPercentage: circuitBreakerErrorThresholdPercentage,
+            circuitBreakerRequestVolumeThreshold: circuitBreakerRequestVolumeThreshold,
+            commandGroup: commandGroup
+            });
         circuitBreakersByCommand.set(commandKey, circuitBreaker);
         return circuitBreakersByCommand.get(commandKey);
 
