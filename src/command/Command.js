@@ -9,10 +9,12 @@ export default class Command {
             commandKey,
             commandGroup,
             runContext,
+            metricsConfig,
+            circuitConfig,
             timeout = HystrixConfig.executionTimeoutInMilliseconds,
             fallback = function(error) {return q.reject(error);},
             run = function() {throw new Error("Command must implement run method.")},
-            isErrorHandler = function(error) {return error;}
+            isErrorHandler = function(error) {return error;},
         }) {
         this.commandKey = commandKey;
         this.commandGroup = commandGroup;
@@ -21,14 +23,16 @@ export default class Command {
         this.fallback = fallback;
         this.timeout = timeout;
         this.isError = isErrorHandler;
+        this.metricsConfig = metricsConfig;
+        this.circuitConfig = circuitConfig;
     }
 
     get circuitBreaker() {
-        return CircuitBreakerFactory.getOrCreate({commandKey: this.commandKey});
+        return CircuitBreakerFactory.getOrCreate(this.circuitConfig);
     }
 
     get metrics() {
-        return CommandMetricsFactory.getOrCreate({commandKey: this.commandKey});
+        return CommandMetricsFactory.getOrCreate(this.metricsConfig);
     }
 
     execute() {

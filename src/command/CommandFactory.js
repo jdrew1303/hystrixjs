@@ -93,8 +93,25 @@ class CommandBuilder {
             return previouslyCached
         }
 
-        createMetrics(this);
-        createCircuitBreaker(this);
+        let metricsConfig = {
+            commandKey: this.commandKey,
+            commandGroup: this.commandGroup,
+            statisticalWindowTimeInMilliSeconds: this.config.statisticalWindowLength,
+            statisticalWindowNumberOfBuckets: this.config.statisticalWindowNumberOfBuckets,
+            percentileWindowTimeInMilliSeconds: this.config.percentileWindowLength,
+            percentileWindowNumberOfBuckets: this.config.percentileWindowNumberOfBuckets
+        };
+        let circuitConfig = {
+            commandKey: this.commandKey,
+            commandGroup: this.commandGroup,
+            circuitBreakerSleepWindowInMilliseconds: this.config.circuitBreakerSleepWindowInMilliseconds,
+            circuitBreakerErrorThresholdPercentage: this.config.circuitBreakerErrorThresholdPercentage,
+            circuitBreakerRequestVolumeThreshold: this.config.circuitBreakerRequestVolumeThreshold,
+            circuitBreakerForceClosed: this.config.circuitBreakerForceClosed,
+            circuitBreakerForceOpened: this.config.circuitBreakerForceOpened
+        };
+        CommandMetricsFactory.getOrCreate(metricsConfig);
+        CircuitBreakerFactory.getOrCreate(circuitConfig);
         let command = new Command({
                 commandKey: this.commandKey,
                 commandGroup: this.commandGroup,
@@ -102,34 +119,13 @@ class CommandBuilder {
                 timeout: this.config.timeout,
                 fallback: this.config.fallback,
                 run: this.config.run,
-                isErrorHandler: this.config.isErrorHandler
+                isErrorHandler: this.config.isErrorHandler,
+                metricsConfig: metricsConfig,
+                circuitConfig: circuitConfig
             });
 
         hystrixCommandsCache.set(this.commandKey, command);
         return hystrixCommandsCache.get(this.commandKey);
     }
 
-}
-
-function createMetrics(builder) {
-    return CommandMetricsFactory.getOrCreate({
-        commandKey: builder.commandKey,
-        commandGroup: builder.commandGroup,
-        statisticalWindowTimeInMilliSeconds: builder.config.statisticalWindowLength,
-        statisticalWindowNumberOfBuckets: builder.config.statisticalWindowNumberOfBuckets,
-        percentileWindowTimeInMilliSeconds: builder.config.percentileWindowLength,
-        percentileWindowNumberOfBuckets: builder.config.percentileWindowNumberOfBuckets
-     });
-}
-
-function createCircuitBreaker(builder) {
-    return CircuitBreakerFactory.getOrCreate({
-        circuitBreakerSleepWindowInMilliseconds: builder.config.circuitBreakerSleepWindowInMilliseconds,
-        commandKey: builder.commandKey,
-        circuitBreakerErrorThresholdPercentage: builder.config.circuitBreakerErrorThresholdPercentage,
-        circuitBreakerRequestVolumeThreshold: builder.config.circuitBreakerRequestVolumeThreshold,
-        commandGroup: builder.commandGroup,
-        circuitBreakerForceClosed: builder.config.circuitBreakerForceClosed,
-        circuitBreakerForceOpened: builder.config.circuitBreakerForceOpened
-    });
 }

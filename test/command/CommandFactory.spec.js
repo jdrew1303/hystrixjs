@@ -54,6 +54,39 @@ describe("CommandFactory", function() {
         expect(cb.circuitBreakerForceClosed).toBeTruthy();
         expect(cb.circuitBreakerForceOpened).toBeTruthy();
         expect(cb.circuitBreakerRequestVolumeThresholdValue).toBe(0);
+    });
+
+    it("should pass correct config to command for circuit and metrics to recreate them after reset", function() {
+        var command = CommandFactory
+            .getOrCreate("TestCustomConfig")
+            .timeout(3000)
+            .statisticalWindowLength(10)
+            .statisticalWindowNumberOfBuckets(1)
+            .percentileWindowLength(20)
+            .percentileWindowNumberOfBuckets(2)
+            .circuitBreakerErrorThresholdPercentage(60)
+            .circuitBreakerForceClosed(true)
+            .circuitBreakerForceOpened(true)
+            .circuitBreakerRequestVolumeThreshold(0)
+            .circuitBreakerSleepWindowInMilliseconds(1000)
+            .build();
+        expect(command.timeout).toBe(3000);
+
+        CommandMetricsFactory.resetCache();
+        CircuitBreakerFactory.resetCache();
+
+        var metrics = command.metrics;
+        expect(metrics.rollingCount.windowLength).toBe(10);
+        expect(metrics.rollingCount.numberOfBuckets).toBe(1);
+        expect(metrics.percentileCount.windowLength).toBe(20);
+        expect(metrics.percentileCount.numberOfBuckets).toBe(2);
+
+        var cb = command.circuitBreaker;
+        expect(cb.circuitBreakerSleepWindowInMilliseconds).toBe(1000);
+        expect(cb.circuitBreakerErrorThresholdPercentage).toBe(60);
+        expect(cb.circuitBreakerForceClosed).toBeTruthy();
+        expect(cb.circuitBreakerForceOpened).toBeTruthy();
+        expect(cb.circuitBreakerRequestVolumeThresholdValue).toBe(0);
     })
 
 });
