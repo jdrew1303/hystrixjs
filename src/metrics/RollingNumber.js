@@ -1,9 +1,13 @@
 import ActualTime from "../util/ActualTime";
+import HystrixConfig from "../util/HystrixConfig";
 import Bucket from "./CounterBucket";
 
 class RollingNumber {
 
-    constructor({timeInMillisecond = 10000, numberOfBuckets = 10} = {}) {
+    constructor({
+                timeInMillisecond = HystrixConfig.metricsStatisticalWindowInMilliseconds,
+                numberOfBuckets = HystrixConfig.metricsStatisticalWindowBuckets
+            } = {}) {
         this.windowLength = timeInMillisecond;
         this.numberOfBuckets = numberOfBuckets;
         this.buckets = [];

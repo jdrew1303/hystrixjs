@@ -2,13 +2,14 @@ import {Factory as CommandMetricsFactory} from "../metrics/CommandMetrics";
 import CircuitBreakerFactory from "./CircuitBreaker";
 import q from "q";
 import ActualTime from "../util/ActualTime"
+import HystrixConfig from "../util/HystrixConfig";
 
 export default class Command {
     constructor({
             commandKey,
             commandGroup,
             runContext,
-            timeout = 0,
+            timeout = HystrixConfig.executionTimeoutInMilliseconds,
             fallback = function(error) {return q.reject(error);},
             run = function() {throw new Error("Command must implement run method.")},
             isErrorHandler = function(error) {return error;}
@@ -23,11 +24,11 @@ export default class Command {
     }
 
     get circuitBreaker() {
-        return CircuitBreakerFactory.getInstance({commandKey: this.commandKey});
+        return CircuitBreakerFactory.getOrCreate({commandKey: this.commandKey});
     }
 
     get metrics() {
-        return CommandMetricsFactory.getInstance({commandKey: this.commandKey});
+        return CommandMetricsFactory.getOrCreate({commandKey: this.commandKey});
     }
 
     execute() {
@@ -77,7 +78,7 @@ export default class Command {
             } else {
                 this.metrics.markFailure();
             }
-            return this.fallback(err);
         }
+        return this.fallback(err);
     }
 }

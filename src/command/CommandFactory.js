@@ -6,7 +6,7 @@ const hystrixCommandsCache = new Map();
 
 export default class CommandFactory {
 
-    static create(commandKey, commandGroup) {
+    static getOrCreate(commandKey, commandGroup) {
         return new CommandBuilder(commandKey, commandGroup);
     }
 
@@ -46,12 +46,28 @@ class CommandBuilder {
         this.config.circuitBreakerRequestVolumeThreshold = value;
         return this;
     }
-    numberOfBuckets (value) {
-        this.config.numberOfBuckets = value;
+    circuitBreakerForceOpened(value) {
+        this.config.circuitBreakerForceOpened = value;
         return this;
     }
-    windowLength (value) {
-        this.config.windowLength = value;
+    circuitBreakerForceClosed(value) {
+        this.config.circuitBreakerForceClosed = value;
+        return this;
+    }
+    statisticalWindowNumberOfBuckets (value) {
+        this.config.statisticalWindowNumberOfBuckets = value;
+        return this;
+    }
+    statisticalWindowLength (value) {
+        this.config.statisticalWindowLength = value;
+        return this;
+    }
+    percentileWindowNumberOfBuckets (value) {
+        this.config.percentileWindowNumberOfBuckets = value;
+        return this;
+    }
+    percentileWindowLength (value) {
+        this.config.percentileWindowLength = value;
         return this;
     }
     circuitBreakerErrorThresholdPercentage (value) {
@@ -96,20 +112,24 @@ class CommandBuilder {
 }
 
 function createMetrics(builder) {
-    return CommandMetricsFactory.getInstance({
-            commandKey: builder.commandKey,
-            commandGroup: builder.commandGroup ,
-            timeInMilliSeconds: builder.config.windowLength,
-            numberOfBuckets: builder.config.numberOfBuckets
-         });
+    return CommandMetricsFactory.getOrCreate({
+        commandKey: builder.commandKey,
+        commandGroup: builder.commandGroup,
+        statisticalWindowTimeInMilliSeconds: builder.config.statisticalWindowLength,
+        statisticalWindowNumberOfBuckets: builder.config.statisticalWindowNumberOfBuckets,
+        percentileWindowTimeInMilliSeconds: builder.config.percentileWindowLength,
+        percentileWindowNumberOfBuckets: builder.config.percentileWindowNumberOfBuckets
+     });
 }
 
 function createCircuitBreaker(builder) {
-    return CircuitBreakerFactory.getInstance({
-            circuitBreakerSleepWindowInMilliseconds: builder.config.circuitBreakerSleepWindowInMilliseconds,
-            commandKey: builder.commandKey,
-            circuitBreakerErrorThresholdPercentage: builder.config.circuitBreakerErrorThresholdPercentage,
-            circuitBreakerRequestVolumeThreshold: builder.config.circuitBreakerRequestVolumeThreshold,
-            commandGroup: builder.commandGroup
-        });
+    return CircuitBreakerFactory.getOrCreate({
+        circuitBreakerSleepWindowInMilliseconds: builder.config.circuitBreakerSleepWindowInMilliseconds,
+        commandKey: builder.commandKey,
+        circuitBreakerErrorThresholdPercentage: builder.config.circuitBreakerErrorThresholdPercentage,
+        circuitBreakerRequestVolumeThreshold: builder.config.circuitBreakerRequestVolumeThreshold,
+        commandGroup: builder.commandGroup,
+        circuitBreakerForceClosed: builder.config.circuitBreakerForceClosed,
+        circuitBreakerForceOpened: builder.config.circuitBreakerForceOpened
+    });
 }

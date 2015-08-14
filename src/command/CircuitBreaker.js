@@ -1,29 +1,50 @@
 import ActualTime from "../util/ActualTime";
 import {Factory as CommandMetricsFactory} from "../metrics/CommandMetrics";
+import HystrixConfig from "../util/HystrixConfig";
 
 class CircuitBreaker {
     constructor({
-            circuitBreakerSleepWindowInMilliseconds: sleep,
             commandKey: key,
             commandGroup: group,
-            circuitBreakerErrorThresholdPercentage: errorThreshold,
-            circuitBreakerRequestVolumeThreshold: volumeThreshold
+            circuitBreakerSleepWindowInMilliseconds: sleep = HystrixConfig.circuitBreakerSleepWindowInMilliseconds,
+            circuitBreakerErrorThresholdPercentage: errorThreshold = HystrixConfig.circuitBreakerErrorThresholdPercentage,
+            circuitBreakerRequestVolumeThreshold: volumeThreshold = HystrixConfig.circuitBreakerRequestVolumeThreshold,
+            circuitBreakerForceClosed: forceClosed = HystrixConfig.circuitBreakerForceClosed,
+            circuitBreakerForceOpened: forceOpened = HystrixConfig.circuitBreakerForceOpened,
         }) {
         this.circuitBreakerSleepWindowInMilliseconds = sleep;
         this.commandKey = key;
         this.commandGroup = group;
-        this.circuitBreakerRequestVolumeThreshold = volumeThreshold;
+        this.circuitBreakerRequestVolumeThresholdValue = volumeThreshold;
         this.circuitBreakerErrorThresholdPercentage = errorThreshold;
         this.circuitOpen = false;
         this.circuitOpenedOrLastTestedTime = ActualTime.getCurrentTime();
+        this.circuitBreakerForceClosed = forceClosed;
+        this.circuitBreakerForceOpened = forceOpened;
     }
 
     allowRequest() {
+        if (this.circuitBreakerForceOpened) {
+            return false;
+        }
+
+        if (this.circuitBreakerForceClosed) {
+            isOpen();
+            return true;
+        }
         return !this.isOpen() || this.allowSingleTest();
     }
 
     get metrics() {
-        return CommandMetricsFactory.getInstance({commandKey: this.commandKey});
+        return CommandMetricsFactory.getOrCreate({commandKey: this.commandKey});
+    }
+
+    get circuitBreakerRequestVolumeThreshold() {
+        if (HystrixConfig.circuitBreakerRequestVolumeThresholdForceOverride) {
+            return HystrixConfig.circuitBreakerRequestVolumeThresholdOverride;
+        } else {
+            return this.circuitBreakerRequestVolumeThresholdValue;
+        }
     }
 
     allowSingleTest() {
@@ -65,12 +86,14 @@ const circuitBreakersByCommand = new Map();
 
 export default class Factory {
 
-    static getInstance({
-            circuitBreakerSleepWindowInMilliseconds = 1000,
+    static getOrCreate({
+            circuitBreakerSleepWindowInMilliseconds,
             commandKey,
-            circuitBreakerErrorThresholdPercentage = 10,
-            circuitBreakerRequestVolumeThreshold = 5,
-            commandGroup = "hystrix"
+            circuitBreakerErrorThresholdPercentage,
+            circuitBreakerRequestVolumeThreshold,
+            commandGroup = "hystrix",
+            circuitBreakerForceClosed,
+            circuitBreakerForceOpened,
         } = {}) {
 
         let previouslyCached = circuitBreakersByCommand.get(commandKey);
@@ -83,7 +106,9 @@ export default class Factory {
             commandKey: commandKey,
             circuitBreakerErrorThresholdPercentage: circuitBreakerErrorThresholdPercentage,
             circuitBreakerRequestVolumeThreshold: circuitBreakerRequestVolumeThreshold,
-            commandGroup: commandGroup
+            commandGroup: commandGroup,
+            circuitBreakerForceClosed: circuitBreakerForceClosed,
+            circuitBreakerForceOpened: circuitBreakerForceOpened
             });
         circuitBreakersByCommand.set(commandKey, circuitBreaker);
         return circuitBreakersByCommand.get(commandKey);

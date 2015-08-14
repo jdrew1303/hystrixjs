@@ -25,7 +25,7 @@ export default class HystrixSSEStream {
         json.group = metrics.commandGroup;
         json.currentTime = ActualTime.getCurrentTime();
 
-        let circuitBreaker = CircuitBreakFactory.getInstance({commandKey: metrics.commandKey});
+        let circuitBreaker = CircuitBreakFactory.getOrCreate({commandKey: metrics.commandKey});
         json.isCircuitBreakerOpen = circuitBreaker.isOpen();
 
         let {totalCount, errorCount, errorPercentage} = metrics.getHealthCounts();

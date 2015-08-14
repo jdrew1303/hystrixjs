@@ -1,5 +1,5 @@
-var CommandMetrics = require("../lib/metrics/CommandMetrics").CommandMetrics;
-var RollingNumberEvent = require("../lib/metrics/RollingNumberEvent");
+var CommandMetrics = require("../../lib/metrics/CommandMetrics").CommandMetrics;
+var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
 
 describe("CommandMetrics", function() {
 
@@ -7,7 +7,7 @@ describe("CommandMetrics", function() {
 
 
     beforeEach(function() {
-        underTest = new CommandMetrics("TestCommand", "defaultGroup");
+        underTest = new CommandMetrics("TestCommandMetrics", "defaultGroup");
     });
 
     it("should increment success counter on markSuccess calls", function() {
@@ -34,27 +34,21 @@ describe("CommandMetrics", function() {
         expect(underTest.getRollingCount(RollingNumberEvent.TIMEOUT)).toBe(3);
     });
 
-    it("should return the sum of all buckets in the window", function(done) {
+    it("should return the sum of all buckets in the window", function() {
         underTest.markTimeout();
         underTest.markTimeout();
         underTest.markTimeout();
-        setTimeout(function() {
-            underTest.markTimeout();
-            expect(underTest.getRollingCount(RollingNumberEvent.TIMEOUT)).toBe(4);
-            done();
-        }, 1001);
+        underTest.rollingCount.rollWindow();
+        underTest.markTimeout();
+        expect(underTest.getRollingCount(RollingNumberEvent.TIMEOUT)).toBe(4);
     });
 
-    it("should return a correct execution time percentile", function(done) {
+    it("should return a correct execution time percentile", function() {
         underTest.addExecutionTime(1);
         underTest.addExecutionTime(11);
-        setTimeout(function(){
-            // this will cause the window to roll and to create the first percentile snapshot
-            underTest.addExecutionTime(1);
-            expect(underTest.getExecutionTime(100)).toBe(11);
-            expect(underTest.getExecutionTime("mean")).toBe(6);
-            done();
-        }, 1001);
+        underTest.percentileCount.rollWindow();
+        expect(underTest.getExecutionTime(100)).toBe(11);
+        expect(underTest.getExecutionTime("mean")).toBe(6);
     });
 
     it("should return 0 values as health counts initially", function(){

@@ -1,4 +1,4 @@
-var RollingPercentile = require("../lib/metrics/RollingPercentile");
+var RollingPercentile = require("../../lib/metrics/RollingPercentile");
 
 function addExecutionTimes(rollingPercentile) {
     rollingPercentile.addValue(1);

@@ -2,23 +2,32 @@ import RollingNumber from "./RollingNumber";
 import RollingPercentile from "./RollingPercentile";
 import RollingNumberEvent from "./RollingNumberEvent";
 import ActualTime from "../util/ActualTime";
+import HystrixConfig from "../util/HystrixConfig";
 
 export class CommandMetrics {
     constructor(commandKey, commandGroup = "hystrix", {
-            timeInMilliSeconds = 10000,
-            numberOfBuckets = 10
+            statisticalWindowTimeInMilliSeconds = HystrixConfig.metricsStatisticalWindowInMilliseconds,
+            statisticalWindowNumberOfBuckets = HystrixConfig.metricsStatisticalWindowBuckets,
+            percentileWindowTimeInMilliSeconds  = HystrixConfig.metricsPercentileWindowInMilliseconds,
+            percentileWindowNumberOfBuckets = HystrixConfig.metricsPercentileWindowBuckets
         } = {}) {
 
         if (!commandKey) {
             throw new Error("Please provide a unique command key for the metrics.");
         }
         this.currentExecutionCount = 0;
-        this.metricsRollingStatisticalWindowInMilliseconds = timeInMilliSeconds;
+        this.metricsRollingStatisticalWindowInMilliseconds = statisticalWindowTimeInMilliSeconds;
         this.commandKey = commandKey;
         this.commandGroup = commandGroup;
         this.lastHealthCountsSnapshot = ActualTime.getCurrentTime();
-        this.rollingCount = new RollingNumber(timeInMilliSeconds, numberOfBuckets);
-        this.percentileCount = new RollingPercentile(timeInMilliSeconds, numberOfBuckets);
+        this.rollingCount = new RollingNumber({
+            timeInMillisecond: statisticalWindowTimeInMilliSeconds,
+            numberOfBuckets: statisticalWindowNumberOfBuckets
+        });
+        this.percentileCount = new RollingPercentile({
+            timeInMillisecond: percentileWindowTimeInMilliSeconds,
+            numberOfBuckets: percentileWindowNumberOfBuckets
+        });
     }
 
     markSuccess() {
@@ -92,11 +101,13 @@ export class CommandMetrics {
 const metricsByCommand = new Map();
 export class Factory {
 
-    static getInstance({
-        commandKey,
-        commandGroup = "hystrix",
-        timeInMilliSeconds,
-        numberOfBuckets
+    static getOrCreate({
+            commandKey,
+            commandGroup = "hystrix",
+            statisticalWindowTimeInMilliSeconds,
+            statisticalWindowNumberOfBuckets,
+            percentileWindowTimeInMilliSeconds,
+            percentileWindowNumberOfBuckets
         } = {}) {
 
         let previouslyCached = metricsByCommand.get(commandKey);
@@ -105,8 +116,10 @@ export class Factory {
         }
 
         let metrics = new CommandMetrics(commandKey, commandGroup, {
-            timeInMilliSeconds: timeInMilliSeconds,
-            numberOfBuckets: numberOfBuckets
+            statisticalWindowTimeInMilliSeconds: statisticalWindowTimeInMilliSeconds,
+            statisticalWindowNumberOfBuckets: statisticalWindowNumberOfBuckets,
+            percentileWindowTimeInMilliSeconds: percentileWindowTimeInMilliSeconds,
+            percentileWindowNumberOfBuckets: percentileWindowNumberOfBuckets
         });
         metricsByCommand.set(commandKey, metrics);
         return metricsByCommand.get(commandKey);

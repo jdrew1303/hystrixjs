@@ -1,5 +1,5 @@
-var Bucket = require("../lib/metrics/PercentileBucket");
-var RollingNumberEvent = require("../lib/metrics/RollingNumberEvent");
+var Bucket = require("../../lib/metrics/PercentileBucket");
+var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
 
 describe("PercentileBucket", function() {
     var underTest;

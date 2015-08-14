@@ -1,6 +1,6 @@
-var CircuitBreakerFactory = require("../lib/command/CircuitBreaker");
-var CommandMetricsFactory = require("../lib/metrics/CommandMetrics").Factory;
-var CommandMetrics = require("../lib/metrics/CommandMetrics").CommandMetrics;
+var CircuitBreakerFactory = require("../../lib/command/CircuitBreaker");
+var CommandMetricsFactory = require("../../lib/metrics/CommandMetrics").Factory;
+var CommandMetrics = require("../../lib/metrics/CommandMetrics").CommandMetrics;
 
 describe ("CircuitBreaker", function() {
 
@@ -20,28 +20,28 @@ describe ("CircuitBreaker", function() {
     }
 
     it("should cache instances in the factory", function() {
-        var cb = CircuitBreakerFactory.getInstance(getCBOptions("Test"));
+        var cb = CircuitBreakerFactory.getOrCreate(getCBOptions("Test"));
         expect(cb).not.toBeUndefined();
         expect(CircuitBreakerFactory.getCache().size).toBe(1);
-        cb = CircuitBreakerFactory.getInstance(getCBOptions("AnotherTest"));
+        cb = CircuitBreakerFactory.getOrCreate(getCBOptions("AnotherTest"));
         expect(cb).not.toBeUndefined();
         expect(CircuitBreakerFactory.getCache().size).toBe(2);
     });
 
     it("should open circuit if error threshold is greater than error percentage", function() {
         var options = getCBOptions("Test");
-        var cb = CircuitBreakerFactory.getInstance(options);
-        var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
+        var cb = CircuitBreakerFactory.getOrCreate(options);
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
         expect(cb.isOpen()).toBeTruthy();
     });
 
-    it("should not open circuit if the volume is not reached threshold", function() {
+    it("should not open circuit if the volume has not reached threshold", function() {
         var options = getCBOptions("Test");
         options.circuitBreakerRequestVolumeThreshold =2;
-        var cb = CircuitBreakerFactory.getInstance(options);
-        var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
+        var cb = CircuitBreakerFactory.getOrCreate(options);
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
         expect(cb.isOpen()).toBeFalsy();
@@ -55,8 +55,8 @@ describe ("CircuitBreaker", function() {
 
     it("should retry after a configured sleep time, if the circuit was open", function(done) {
         var options = getCBOptions("Test");
-        var cb = CircuitBreakerFactory.getInstance(options);
-        var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
+        var cb = CircuitBreakerFactory.getOrCreate(options);
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
         expect(cb.allowRequest()).toBeFalsy();
@@ -69,8 +69,8 @@ describe ("CircuitBreaker", function() {
 
     it("should reset metrics after the circuit was closed again", function() {
         var options = getCBOptions("Test");
-        var cb = CircuitBreakerFactory.getInstance(options);
-        var metrics = CommandMetricsFactory.getInstance({commandKey: "Test"});
+        var cb = CircuitBreakerFactory.getOrCreate(options);
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
         expect(cb.allowRequest()).toBeFalsy();

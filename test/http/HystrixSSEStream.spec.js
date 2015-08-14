@@ -1,6 +1,6 @@
-var HystrixSSEStream = require("../lib/http/HystrixSSEStream");
-var CommandFactory = require("../lib/command/CommandFactory");
-var CommandMetricsFactory = require("../lib/metrics/CommandMetrics").Factory;
+var HystrixSSEStream = require("../../lib/http/HystrixSSEStream");
+var CommandFactory = require("../../lib/command/CommandFactory");
+var CommandMetricsFactory = require("../../lib/metrics/CommandMetrics").Factory;
 var q = require("q");
 
 describe("HystrixSSEStream", function() {
@@ -19,7 +19,7 @@ describe("HystrixSSEStream", function() {
             });
         };
 
-        var command = CommandFactory.create(commandKey)
+        var command = CommandFactory.getOrCreate(commandKey)
             .run(run)
             .build();
 

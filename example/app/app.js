@@ -52,14 +52,14 @@ module.exports = function(port) {
     this.configure = function(config) {
 
         config.services.forEach(function(service) {
-            var serviceCommand = CommandsFactory.create("Service on port :" + service.port + ":" + port)
+            var serviceCommand = CommandsFactory.getOrCreate("Service on port :" + service.port + ":" + port)
                 .circuitBreakerErrorThresholdPercentage(service.errorThreshold)
                 .timeout(service.timeout)
                 .run(makeRequest)
                 .circuitBreakerRequestVolumeThreshold(service.concurrency)
                 .circuitBreakerSleepWindowInMilliseconds(service.timeout)
-                .windowLength(10000)
-                .numberOfBuckets(10)
+                .statisticalWindowLength(10000)
+                .statisticalWindowNumberOfBuckets(10)
                 .errorHandler(isErrorHandler)
                 .build();
             serviceCommand.service = service;

@@ -1,5 +1,5 @@
-var RollingNumber = require("../lib/metrics/RollingNumber");
-var RollingNumberEvent = require("../lib/metrics/RollingNumberEvent");
+var RollingNumber = require("../../lib/metrics/RollingNumber");
+var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
 
 describe("RollingNumber", function() {
 

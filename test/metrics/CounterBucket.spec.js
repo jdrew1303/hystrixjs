@@ -1,5 +1,5 @@
-var Bucket = require("../lib/metrics/CounterBucket");
-var RollingNumberEvent = require("../lib/metrics/RollingNumberEvent");
+var Bucket = require("../../lib/metrics/CounterBucket");
+var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
 
 describe("CounterBucket", function() {
     var underTest;
