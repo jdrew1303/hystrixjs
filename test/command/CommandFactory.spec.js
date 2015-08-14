@@ -37,7 +37,7 @@ describe("CommandFactory", function() {
             .circuitBreakerErrorThresholdPercentage(60)
             .circuitBreakerForceClosed(true)
             .circuitBreakerForceOpened(true)
-            .circuitBreakerRequestVolumeThreshold(40)
+            .circuitBreakerRequestVolumeThreshold(0)
             .circuitBreakerSleepWindowInMilliseconds(1000)
             .build();
         expect(command.timeout).toBe(3000);
@@ -53,7 +53,7 @@ describe("CommandFactory", function() {
         expect(cb.circuitBreakerErrorThresholdPercentage).toBe(60);
         expect(cb.circuitBreakerForceClosed).toBeTruthy();
         expect(cb.circuitBreakerForceOpened).toBeTruthy();
-        expect(cb.circuitBreakerRequestVolumeThresholdValue).toBe(40);
+        expect(cb.circuitBreakerRequestVolumeThresholdValue).toBe(0);
     })
 
 });
