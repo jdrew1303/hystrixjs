@@ -2,17 +2,17 @@ var gulp = require('gulp');
 var babel = require('gulp-babel');
 var plumber = require('gulp-plumber');
 var jasmine = require('gulp-jasmine');
+var bump = require('gulp-bump');
+var git = require('gulp-git');
 
 var path = require('path');
 
 var paths = {
     es6: ['src/**/*.js'],
-    es5: 'lib',
-    // Must be absolute or relative to source map
-    sourceRoot: path.join(__dirname, 'es6'),
+    es5: 'lib'
 };
 
-gulp.task('babel', function (cb) { // (A)
+gulp.task('babel', function (cb) {
     gulp.src(paths.es6)
         .pipe(plumber())
         .pipe(babel())
@@ -29,9 +29,32 @@ gulp.task('test', function () {
     );
 });
 
-gulp.task('watch', function() { // (D)
+gulp.task('watch', function() {
     gulp.watch(paths.es6, ['babel']);
     gulp.watch(['test/**/*','lib/**/*'], ['test']);
 });
 
-gulp.task('default', ['watch']); // (E)
+gulp.task('bump', function () {
+    return gulp.src(['./package.json'])
+        .pipe(bump())
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('tag', ['bump'], function () {
+    var pkg = require('./package.json');
+    var v = 'v' + pkg.version;
+    var message = 'Release ' + v;
+
+    return gulp.src('./')
+        .pipe(git.commit(message))
+        .pipe(git.tag(v, message))
+        .pipe(git.push('origin', 'master', '--tags'))
+        .pipe(gulp.dest('./'));
+});
+
+gulp.task('npm', ['tag'], function (done) {
+    require('child_process').spawn('npm', ['publish'], { stdio: 'inherit' })
+        .on('close', done);
+});
+
+gulp.task('default', ['watch']);

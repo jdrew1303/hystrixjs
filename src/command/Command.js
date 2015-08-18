@@ -49,7 +49,7 @@ export default class Command {
         let start = ActualTime.getCurrentTime();
         let promise = this.run.apply(this.runContext, arguments);
         if (this.timeout > 0) {
-            promise = promise.timeout(this.timeout, "HystrixTimeOut");
+            promise = promise.timeout(this.timeout, "CommandTimeOut");
         }
 
         return promise
@@ -77,7 +77,7 @@ export default class Command {
 
     handleFailure(err) {
         if (this.isError(err)) {
-            if (err.message === "HystrixTimeOut") {
+            if (err.message === "CommandTimeOut") {
                 this.metrics.markTimeout();
             } else {
                 this.metrics.markFailure();

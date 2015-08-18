@@ -34,10 +34,6 @@ class CommandBuilder {
         this.config.isErrorHandler = value;
         return this;
     }
-    promiseLib (value) {
-        this.config.promiseLib = value;
-        return this;
-    }
     timeout (value) {
         this.config.timeout = value;
         return this;
