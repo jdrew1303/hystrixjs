@@ -33,7 +33,7 @@ If the function times out or fails, the execution will be forwarded to the fallb
 Per default the fallback function rejects the promise with the passed error. It could however implement a logic to provide a generic response, which does not depend on network calls.
 If the "run" function succeeds, the command will return a Promise resolving with the response, after it performs some metrics logging.
 
-## Calculating Circuit Breaker Health
+### Calculating Circuit Breaker Health
 
 The circuit breaker follows the same logic as the one in the original Hystrix [Module](https://github.com/Netflix/Hystrix/wiki/How-it-Works#circuit-breaker). In short following steps are performed to calculate the health:
 
