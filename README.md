@@ -146,4 +146,30 @@ This will make the library to always check the circuit breaker before executing 
                 });
             }).then(failTest(done));
         }).then(failTest(done));
-``` 
+```
+
+## Monitoring
+
+The library provides a module [HystrixSSEStream](https://bitbucket.org/igor_sechyn/hystrixjs/src/cba4b540569223b3173da3eb9bdfe7a1376b7586/src/http/HystrixSSEStream.js?at=master) to export gathered metrics as a server side events stream. This stream can be used with [Hystrix Dashboard](https://github.com/Netflix/Hystrix/tree/master/hystrix-dashboard) to visualise the current state of the service, or its external communication points to be more precise:
+
+![dashboard.png](https://bitbucket.org/repo/zq8Kzy/images/2774708950-dashboard.png)
+
+In order to use it, the service must expose another end point, which writes the SSE data into response:
+```javascript
+var hystrixSSEStream = require('hystrixjs').hystrixSSEStream;
+function hystrixStreamResponse(request, response) {
+    response.append('Content-Type', 'text/event-stream;charset=UTF-8');
+    response.append('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+    response.append('Pragma', 'no-cache');
+    return hystrixSSEStream.toObservable().subscribe(
+        function onNext(sseData) {
+            response.write('data: ' + sseData + '\n\n');
+        },
+        function onError(error) {console.log(error);
+        },
+        function onComplete() {
+            return response.end();
+        }
+    );
+};
+```
