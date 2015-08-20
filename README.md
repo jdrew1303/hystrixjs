@@ -24,7 +24,7 @@ Since this library targets nodejs application, it is by far not as complex as th
 
 Following diagram shows what happens when a function call is wrapped in a Command
 
-<img src="">
+![diagram.png](https://bitbucket.org/repo/zq8Kzy/images/79170045-diagram.png)
 
 The Command is constructed with the help of the CommandsFactory. It expects a unique key and a "run" function, which will be called, when the command is executed. Note: the function must return a Promise.
 The returned object provides an execute() method, which will call the specified "run" function with the passed arguments. Within the execute() method it will check if the circuit breaker is open (or "tripped") and if it is,
@@ -63,17 +63,17 @@ var serviceCommand = CommandsFactory.getOrCreate("Service on port :" + service.p
 
 Each generated command is cached based on its key supplied as the first parameter. The "getOrCreate()" method returns a "CommandBuilder" object, which provides methods for configuration of:
 
-- circuitBreakerSleepWindowInMilliseconds - how long the circuit breaker should stay opened, before allowing a single request to test the health of the service
-- errorHandler - function to validate if the error response from the service is an actual error. If this function returns an error object (default implementation),
+- *circuitBreakerSleepWindowInMilliseconds* - how long the circuit breaker should stay opened, before allowing a single request to test the health of the service
+- *errorHandler* - function to validate if the error response from the service is an actual error. If this function returns an error object (default implementation),
 this request call will be marked as failure, which will influence the error percentage.
 If it returns null or false, the call will not be marked as failure. An example could be a 404 error, if the customer is not found.
-- timeout for request
-- circuitBreakerRequestVolumeThreshold - number of concurrent execution, that needs to be exceeded, before the circuit breaker will bother at all to calculate the health
-- circuitBreakerForceOpened - force this circuit breaker to be always opened
-- circuitBreakerForceClosed - force this circuit breaker to be always closed
-- circuitBreakerErrorThresholdPercentage - error percentage threshold to trip the circuit
-- statisticalWindowLength - length of the window to keep track of execution counts metrics (success, failure)
-- statisticalWindowNumberOfBuckets - number of buckets within the statistical window
-- percentileWindowNumberOfBuckets - number of buckets within the percentile window
-- percentileWindowLength - length of the window to keep track of execution times
-- fallbackTo - function, which will be executed if the request fails
+- *timeout* for request
+- *circuitBreakerRequestVolumeThreshold* - number of concurrent execution, that needs to be exceeded, before the circuit breaker will bother at all to calculate the health
+- *circuitBreakerForceOpened* - force this circuit breaker to be always opened
+- *circuitBreakerForceClosed* - force this circuit breaker to be always closed
+- *circuitBreakerErrorThresholdPercentage* - error percentage threshold to trip the circuit
+- *statisticalWindowLength* - length of the window to keep track of execution counts metrics (success, failure)
+- *statisticalWindowNumberOfBuckets* - number of buckets within the statistical window
+- *percentileWindowNumberOfBuckets* - number of buckets within the percentile window
+- *percentileWindowLength* - length of the window to keep track of execution times
+- *fallbackTo* - function, which will be executed if the request fails
