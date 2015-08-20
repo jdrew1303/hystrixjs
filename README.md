@@ -20,7 +20,7 @@ Since this library targets nodejs application, it is by far not as complex as th
 - measures execution times
 - trips a circuit-breaker to stop all requests to a particular service for a period of time, if the error percentage for this service passes a configured threshold
 - performs fallback logic, when the execution fails, times out or is short-circuits
-- provides a SSE of metrics, which can be visualised in Hystrix Dashbord (https://github.com/Netflix/Hystrix/tree/master/hystrix-dashboard) for near real-time monitoring
+- provides a SSE of metrics, which can be visualised in [Hystrix Dashbord](https://github.com/Netflix/Hystrix/tree/master/hystrix-dashboard) for near real-time monitoring
 
 Following diagram shows what happens when a function call is wrapped in a Command
 
@@ -46,7 +46,7 @@ If the volume exceeds the threshold, the circuit will check the health first
 
 All external communication points should be wrapped within a command. The command factory is the entry point to get the existing or generate a new command.
 
-```java
+```javascript
 
 var serviceCommand = CommandsFactory.getOrCreate("Service on port :" + service.port + ":" + port)
     .circuitBreakerErrorThresholdPercentage(service.errorThreshold)
@@ -77,3 +77,33 @@ If it returns null or false, the call will not be marked as failure. An example 
 - *percentileWindowNumberOfBuckets* - number of buckets within the percentile window
 - *percentileWindowLength* - length of the window to keep track of execution times
 - *fallbackTo* - function, which will be executed if the request fails
+
+All of these options have defaults and does not have to be configured. See [HystrixConfig](https://bitbucket.org/igor_sechyn/hystrixjs/src/4cf3ba2dd28eb69481cca384bab21082670c0e00/src/util/HystrixConfig.js) for details. These can be overridden on app startup.
+
+## Executing a command
+
+To execute a command just call the "execute" method and pass the parameters:
+
+```javascript
+var promise = serviceCommand.execute(arguments)
+```
+
+The *arguments* will be passed into the *run* function and the result will be a promise.
+
+## How to test?
+
+Testing could be tricky, especially because the library introduces state, which could interfere between the single unit tests. In order to avoid this kind of problems the library provides access to the factories producing metrics, circuits and commands. These can be used to reset the state before each test:
+```javascript
+var commandFactory = require('hystrixjs').commandFactory;
+var metricsFactory = require('hystrixjs').metricsFactory;
+var circuitFactory = require('hystrixjs').circuitFactory;
+
+metricsFactory.resetCache();
+circuitFactory.resetCache();
+commandFactory.resetCache();
+```
+
+The same problems occur during integration tests, only in this case you cannot access the metrics. I was trying out two different strategies to solve this problem:
+
+- restarting the service under test before each test, which significantly increased the execution time
+- adding and calling an endpoint to reset the metrics before each test
