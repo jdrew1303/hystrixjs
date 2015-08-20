@@ -39,7 +39,7 @@ describe("Command", function() {
 
         expect(command).not.toBeUndefined();
         command.execute("success").catch(function(err) {
-            expect(err.message).toBe("HystrixTimeOut");
+            expect(err.message).toBe("CommandTimeOut");
             var metrics = CommandMetricsFactory.getOrCreate({commandKey: "TestCommandTimeout"});
             expect(metrics.getHealthCounts().totalCount).toBe(1);
             expect(metrics.getHealthCounts().errorCount).toBe(1);
