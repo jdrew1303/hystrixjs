@@ -103,7 +103,47 @@ circuitFactory.resetCache();
 commandFactory.resetCache();
 ```
 
-The same problems occur during integration tests, only in this case you cannot access the metrics. I was trying out two different strategies to solve this problem:
+The same problems occur during integration tests, only in this case there is no direct access to the artefacts. There could be two different strategies to solve this problem:
 
-- restarting the service under test before each test, which significantly increased the execution time
+- restarting the service under test before each test, which can significantly increase the execution time
 - adding and calling an endpoint to reset the metrics before each test
+
+Another question is, how to actually test, that the library is used correctly. Specifically, it should be possible to test, that if the circuit is open, the service  under test is not calling the 3rd party services and the command returns a correct error message (e.g. 503 Service is unavailable). Now the biggest problem is to generate a load on the service to make the command to actually trip the circuit. Remember *circuitBreakerRequestVolumeThreshold*, the circuit breaker won't do anything, if the load on the 3rd party library is not high enough. To tackle this kind of problem one could:
+- generate the load on the service within the test, which is not trivial, since it is not quite easy to do it in node (one thread, no concurrency). One could spawn a child process to hammer the service from the integration test, but it seemed to be very clumsy and flakey as well
+- provide configuration hooks to influence the library, which can be overridden based on environment
+
+[HystrixConfig](https://bitbucket.org/igor_sechyn/hystrixjs/src/cba4b540569223b3173da3eb9bdfe7a1376b7586/src/util/HystrixConfig.js?at=master) provides two configuration options with the following defaults:
+
+```
+"hystrix.circuit.volumeThreshold.forceOverride": false,
+"hystrix.circuit.volumeThreshold.override": 10,
+```
+
+Depending on the environment the service is being started in, these options can be overridden:
+
+```javascript
+var hystrixConfig = require('hystrixjs').hystrixConfig;
+if (localEnv) {
+    hystrixConfig.init({
+        "hystrix.circuit.volumeThreshold.forceOverride": true,
+        "hystrix.circuit.volumeThreshold.override": 0
+    });
+}
+```
+This will make the library to always check the circuit breaker before executing a request. So now the circuit can be tripped by a deliberately false request, which would record a failure and bump the error percentage to 100%. The subsequent request, which should normally return a 200 response, should fail with 503 response:
+```javascript
+        makeRequest('returning-http-500').fail(function (json) {
+            expect(json).toEqual({
+                errors: [{
+                    message: 'There was an unexpected error.'
+                }]
+            });
+            makeRequest('returning-success-200').fail(function (json) {
+                expect(json).toEqual({
+                    errors: [{
+                        message: 'Service unavailable.'
+                    }]
+                });
+            }).then(failTest(done));
+        }).then(failTest(done));
+``` 
