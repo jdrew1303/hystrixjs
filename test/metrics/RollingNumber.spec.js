@@ -1,5 +1,7 @@
 var RollingNumber = require("../../lib/metrics/RollingNumber");
 var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
+var rewire = require("rewire");
+var support = require("../support");
 
 describe("RollingNumber", function() {
 
@@ -23,34 +25,31 @@ describe("RollingNumber", function() {
         expect(lastBucket.get(RollingNumberEvent.SUCCESS)).toBe(2);
     });
 
-    it("should roll the last bucket", function(done) {
-        var underTest = new RollingNumber();
-        var originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    it("should roll the last bucket", function() {
+        var RollingNumberRewired = rewire("../../lib/metrics/RollingNumber");
+        var underTest = new RollingNumberRewired();
+
         underTest.increment(RollingNumberEvent.SUCCESS);
-        setTimeout(function() {
-            underTest.increment(RollingNumberEvent.SUCCESS);
-            expect(underTest.buckets.length).toBe(2);
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-            done();
-        }, 1500);
+        support.fastForwardActualTime(RollingNumberRewired, 1001);
+
+        underTest.increment(RollingNumberEvent.SUCCESS);
+        expect(underTest.buckets.length).toBe(2);
     });
 
-    it("should reset the window if no activity was reported for the period longer than the window itself", function(done) {
-        var underTest = new RollingNumber({timeInMillisecond: 1000, numberOfBuckets: 2});
-        var originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    it("should reset the window if no activity was reported for the period longer than the window itself", function() {
+        var RollingNumberRewired = rewire("../../lib/metrics/RollingNumber");
+        var underTest = new RollingNumberRewired({timeInMillisecond: 1000, numberOfBuckets: 2});
         underTest.increment(RollingNumberEvent.SUCCESS);
         underTest.rollWindow(Date.now());
         underTest.increment(RollingNumberEvent.SUCCESS);
         expect(underTest.buckets.length).toBe(2);
-        setTimeout(function() {
-            underTest.increment(RollingNumberEvent.SUCCESS);
-            expect(underTest.buckets.length).toBe(1);
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-            done();
-        }, 1001);
+
+        support.fastForwardActualTime(RollingNumberRewired, 1001);
+
+        underTest.increment(RollingNumberEvent.SUCCESS);
+        expect(underTest.buckets.length).toBe(1);
     });
+
 
     it("should not exceed the max number of buckets", function() {
         var underTest = new RollingNumber({windowLength: 60000, numberOfBuckets: 2});
@@ -61,19 +60,17 @@ describe("RollingNumber", function() {
         expect(underTest.buckets.length).toBe(2);
     });
 
-    it("should return the sum of the values from all buckets", function(done) {
-        var underTest = new RollingNumber();
-        var originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    it("should return the sum of the values from all buckets", function() {
+        var RollingNumberRewired = rewire("../../lib/metrics/RollingNumber");
+        var underTest = new RollingNumberRewired();
+
         underTest.increment(RollingNumberEvent.SUCCESS);
-        setTimeout(function() {
-            underTest.increment(RollingNumberEvent.SUCCESS);
-            underTest.increment(RollingNumberEvent.SUCCESS);
-            underTest.increment(RollingNumberEvent.SUCCESS);
-            expect(underTest.buckets.length).toBe(2);
-            expect(underTest.getRollingSum(RollingNumberEvent.SUCCESS)).toBe(4);
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-            done();
-        }, 1500);
+
+        support.fastForwardActualTime(RollingNumberRewired, 1500);
+        underTest.increment(RollingNumberEvent.SUCCESS);
+        underTest.increment(RollingNumberEvent.SUCCESS);
+        underTest.increment(RollingNumberEvent.SUCCESS);
+        expect(underTest.buckets.length).toBe(2);
+        expect(underTest.getRollingSum(RollingNumberEvent.SUCCESS)).toBe(4);
     });
 });

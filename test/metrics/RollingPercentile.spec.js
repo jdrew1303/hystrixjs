@@ -1,4 +1,6 @@
 var RollingPercentile = require("../../lib/metrics/RollingPercentile");
+var rewire = require("rewire");
+var support = require("../support");
 
 function addExecutionTimes(rollingPercentile) {
     rollingPercentile.addValue(1);
@@ -20,17 +22,13 @@ describe("RollingPercentile", function() {
 
     });
 
-    it("should roll the last bucket", function(done) {
-        var underTest = new RollingPercentile();
-        var originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    it("should roll the last bucket", function() {
+        var RollingPercentileRewired = rewire("../../lib/metrics/RollingPercentile");
+        var underTest = new RollingPercentileRewired();
         underTest.addValue(1);
-        setTimeout(function() {
-            underTest.addValue(2);
-            expect(underTest.buckets.length).toBe(2);
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-            done();
-        }, 1500);
+        support.fastForwardActualTime(RollingPercentileRewired, 1500);
+        underTest.addValue(2);
+        expect(underTest.buckets.length).toBe(2);
     });
 
     it("should calculate correct percentile after the first window roll", function() {

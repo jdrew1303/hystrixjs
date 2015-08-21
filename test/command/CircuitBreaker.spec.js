@@ -1,6 +1,8 @@
 var CircuitBreakerFactory = require("../../lib/command/CircuitBreaker");
 var CommandMetricsFactory = require("../../lib/metrics/CommandMetrics").Factory;
 var CommandMetrics = require("../../lib/metrics/CommandMetrics").CommandMetrics;
+var rewire = require("rewire");
+var support = require("../support");
 
 describe ("CircuitBreaker", function() {
 
@@ -53,18 +55,18 @@ describe ("CircuitBreaker", function() {
         expect(cb.isOpen()).toBeTruthy();
     });
 
-    it("should retry after a configured sleep time, if the circuit was open", function(done) {
+    it("should retry after a configured sleep time, if the circuit was open", function() {
         var options = getCBOptions("Test");
-        var cb = CircuitBreakerFactory.getOrCreate(options);
+        var CircuitBreakerFactoryRewired = rewire("../../lib/command/CircuitBreaker");
+        var cb = CircuitBreakerFactoryRewired.getOrCreate(options);
         var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
         metrics.markSuccess();
         metrics.markFailure();
         expect(cb.allowRequest()).toBeFalsy();
-        setTimeout(function() {
-            expect(cb.isOpen()).toBeTruthy();
-            expect(cb.allowRequest()).toBeTruthy();
-            done();
-        }, 1001);
+
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 1001);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeTruthy();
     });
 
     it("should reset metrics after the circuit was closed again", function() {

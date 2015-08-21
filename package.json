@@ -22,14 +22,16 @@
     "lodash": "^3.10.1",
     "minimist": "^1.1.2",
     "request": "^2.60.0",
-    "request-promise-json": "^1.0.4"
+    "request-promise-json": "^1.0.4",
+    "rewire": "^2.3.4",
+    "sinon": "^1.16.1"
   },
   "dependencies": {
     "rx": "^3.0.0",
     "q": "^1.0.1",
     "fast-stats": "0.0.3"
   },
-  "publishConfig":{
-    "registry":"https://registry.npmjs.org/"
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   }
 }

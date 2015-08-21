@@ -34,7 +34,7 @@ describe("Command", function() {
 
         var command = CommandFactory.getOrCreate("TestCommandTimeout")
             .run(run)
-            .timeout(1000)
+            .timeout(500)
             .build();
 
         expect(command).not.toBeUndefined();
