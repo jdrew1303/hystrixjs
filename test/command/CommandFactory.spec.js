@@ -11,6 +11,7 @@ describe("CommandFactory", function() {
     it("should use the defaults set in HystrixConfig", function() {
         var command = CommandFactory.getOrCreate("TestConfig").build();
         expect(command.timeout).toBe(30000);
+        expect(command.requestVolumeRejectionThreshold).toBe(0);
 
         var metrics = CommandMetricsFactory.getOrCreate({commandKey:"TestConfig"});
         expect(metrics.rollingCount.windowLength).toBe(10000);
@@ -39,8 +40,10 @@ describe("CommandFactory", function() {
             .circuitBreakerForceOpened(true)
             .circuitBreakerRequestVolumeThreshold(0)
             .circuitBreakerSleepWindowInMilliseconds(1000)
+            .requestVolumeRejectionThreshold(100)
             .build();
         expect(command.timeout).toBe(3000);
+        expect(command.requestVolumeRejectionThreshold).toBe(100);
 
         var metrics = CommandMetricsFactory.getOrCreate({commandKey:"TestCustomConfig"});
         expect(metrics.rollingCount.windowLength).toBe(10);
@@ -69,6 +72,7 @@ describe("CommandFactory", function() {
             .circuitBreakerForceOpened(true)
             .circuitBreakerRequestVolumeThreshold(0)
             .circuitBreakerSleepWindowInMilliseconds(1000)
+            .requestVolumeRejectionThreshold(100)
             .build();
         expect(command.timeout).toBe(3000);
 

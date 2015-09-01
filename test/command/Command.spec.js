@@ -1,6 +1,9 @@
 var CommandFactory = require("../../lib/command/CommandFactory");
 var q = require("q");
 var CommandMetricsFactory = require("../../lib/metrics/CommandMetrics").Factory;
+var failTest = require("../support").failTest;
+var RollingNumberEvent = require("../../lib/metrics/RollingNumberEvent");
+
 describe("Command", function() {
     it("should resolve with expected results", function(done) {
         var run = function(arg) {
@@ -104,7 +107,7 @@ describe("Command", function() {
         });
     });
 
-    it("should execute the run command, if the threshold is not reached", function(done) {
+    it("should execute the run command, if the circuit volume threshold is not reached", function(done) {
         var object = {
             run:function() {
                 return q.Promise(function(resolve, reject, notify) {
@@ -164,4 +167,54 @@ describe("Command", function() {
         });
     });
 
+    it("should reject request immediately, if the request volume threshold is reached", function(done) {
+        var run = function(arg) {
+            return q.Promise(function(resolve, reject, notify) {
+                resolve(arg);
+            });
+        };
+
+        var command = CommandFactory.getOrCreate("VolumeThresholdCommand")
+            .run(run)
+            .requestVolumeRejectionThreshold(2)
+            .build();
+
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "VolumeThresholdCommand"});
+        metrics.incrementExecutionCount();
+        metrics.incrementExecutionCount();
+        command.execute("success").then(failTest(done)).fail(function(error) {
+            expect(error.message).toBe("CommandRejected");
+            expect(metrics.getRollingCount(RollingNumberEvent.REJECTED)).toBe(1);
+            done();
+        });
+    });
+
+    it("should execute fallback, if the request volume threshold is reached", function(done) {
+        var object = {
+            run:function() {
+                return q.Promise(function(resolve, reject, notify) {
+                    reject(new Error("error"));
+                });
+            }
+        };
+
+        spyOn(object, "run").and.callThrough();
+        var command = CommandFactory.getOrCreate("VolumeThresholdCommandFallback")
+            .run(object.run)
+            .fallbackTo(function(err) {
+                return q.resolve("fallback");
+            })
+            .requestVolumeRejectionThreshold(2)
+            .build();
+
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "VolumeThresholdCommandFallback"});
+        metrics.incrementExecutionCount();
+        metrics.incrementExecutionCount();
+        command.execute("success").then(function(result) {
+            expect(result).toBe("fallback");
+            expect(metrics.getRollingCount(RollingNumberEvent.REJECTED)).toBe(1);
+            expect(object.run).not.toHaveBeenCalled();
+            done();
+        }).fail(failTest(done));
+    })
 });

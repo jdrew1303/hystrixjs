@@ -42,6 +42,10 @@ class CommandBuilder {
         this.config.circuitBreakerRequestVolumeThreshold = value;
         return this;
     }
+    requestVolumeRejectionThreshold (value) {
+        this.config.requestVolumeRejectionThreshold = value;
+        return this;
+    }
     circuitBreakerForceOpened(value) {
         this.config.circuitBreakerForceOpened = value;
         return this;
@@ -117,7 +121,8 @@ class CommandBuilder {
                 run: this.config.run,
                 isErrorHandler: this.config.isErrorHandler,
                 metricsConfig: metricsConfig,
-                circuitConfig: circuitConfig
+                circuitConfig: circuitConfig,
+                requestVolumeRejectionThreshold: this.config.requestVolumeRejectionThreshold
             });
 
         hystrixCommandsCache.set(this.commandKey, command);

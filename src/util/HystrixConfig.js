@@ -9,6 +9,7 @@ let HystrixPropertiesNames = {
     HYSTRIX_CIRCUIT_VOLUME_THRESHOLD: "hystrix.circuit.volumeThreshold",
     HYSTRIX_FORCE_OVERRIDE_CIRCUIT_VOLUME_THRESHOLD: "hystrix.circuit.volumeThreshold.forceOverride",
     HYSTRIX_CIRCUIT_VOLUME_THRESHOLD_OVERRIDE: "hystrix.circuit.volumeThreshold.override",
+    HYSTRIX_REQUEST_VOLUME_REJECTION_THRESHOLD: "hystrix.request.volume.rejectionThreshold",
     HYSTRIX_EXECUTION_TIMEOUT_IN_MS: "hystrix.execution.timeoutInMilliseconds",
     HYSTRIX_METRICS_STATISTICAL_WINDOW_IN_MS: "hystrix.metrics.statistical.window.timeInMilliseconds",
     HYSTRIX_METRICS_STATISTICAL_WINDOW_BUCKETS: "hystrix.metrics.statistical.window.bucketsNumber",
@@ -28,7 +29,8 @@ let defaults = {
     "hystrix.metrics.statistical.window.timeInMilliseconds": 10000,
     "hystrix.metrics.statistical.window.bucketsNumber": 10,
     "hystrix.metrics.percentile.window.timeInMilliseconds": 10000,
-    "hystrix.metrics.percentile.window.bucketsNumber": 10
+    "hystrix.metrics.percentile.window.bucketsNumber": 10,
+    "hystrix.request.volume.rejectionThreshold": 0
 };
 
 class HystrixConfig {
@@ -82,6 +84,10 @@ class HystrixConfig {
 
     static get metricsPercentileWindowBuckets() {
         return customProperties.get(HystrixPropertiesNames.HYSTRIX_METRICS_PERCENTILE_WINDOW_BUCKETS);
+    }
+
+    static get requestVolumeRejectionThreshold() {
+        return customProperties.get(HystrixPropertiesNames.HYSTRIX_REQUEST_VOLUME_REJECTION_THRESHOLD);
     }
 
     static resetProperties() {
@@ -158,6 +164,12 @@ class HystrixConfig {
         if (properties[HystrixPropertiesNames.HYSTRIX_METRICS_STATISTICAL_WINDOW_IN_MS] != undefined) {
             customProperties.set(HystrixPropertiesNames.HYSTRIX_METRICS_STATISTICAL_WINDOW_IN_MS,
                 properties[HystrixPropertiesNames.HYSTRIX_METRICS_STATISTICAL_WINDOW_IN_MS]
+            )
+        }
+
+        if (properties[HystrixPropertiesNames.HYSTRIX_REQUEST_VOLUME_REJECTION_THRESHOLD] != undefined) {
+            customProperties.set(HystrixPropertiesNames.HYSTRIX_REQUEST_VOLUME_REJECTION_THRESHOLD,
+                properties[HystrixPropertiesNames.HYSTRIX_REQUEST_VOLUME_REJECTION_THRESHOLD]
             )
         }
     }

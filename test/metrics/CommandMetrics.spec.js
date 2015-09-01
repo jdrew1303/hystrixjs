@@ -26,12 +26,28 @@ describe("CommandMetrics", function() {
         expect(underTest.getRollingCount(RollingNumberEvent.FAILURE)).toBe(3);
     });
 
-    it("should increment timeout counter on markFailure calls", function() {
+    it("should increment timeout counter on markTimeout calls", function() {
         underTest.markTimeout();
         expect(underTest.getRollingCount(RollingNumberEvent.TIMEOUT)).toBe(1);
         underTest.markTimeout();
         underTest.markTimeout();
         expect(underTest.getRollingCount(RollingNumberEvent.TIMEOUT)).toBe(3);
+    });
+
+    it("should increment rejected counter on markRejected calls", function() {
+        underTest.markRejected();
+        expect(underTest.getRollingCount(RollingNumberEvent.REJECTED)).toBe(1);
+        underTest.markRejected();
+        underTest.markRejected();
+        expect(underTest.getRollingCount(RollingNumberEvent.REJECTED)).toBe(3);
+    });
+
+    it("should increment short circuited counter on markShortCircuited calls", function() {
+        underTest.markShortCircuited();
+        expect(underTest.getRollingCount(RollingNumberEvent.SHORT_CIRCUITED)).toBe(1);
+        underTest.markShortCircuited();
+        underTest.markShortCircuited();
+        expect(underTest.getRollingCount(RollingNumberEvent.SHORT_CIRCUITED)).toBe(3);
     });
 
     it("should return the sum of all buckets in the window", function() {
@@ -65,9 +81,10 @@ describe("CommandMetrics", function() {
 
         underTest.markFailure();
         underTest.markFailure();
+        underTest.markShortCircuited();
         underTest.markTimeout();
         underTest.markTimeout();
-        underTest.markTimeout();
+        underTest.markRejected();
 
         expect(underTest.getHealthCounts().totalCount).toBe(8);
         expect(underTest.getHealthCounts().errorCount).toBe(5);

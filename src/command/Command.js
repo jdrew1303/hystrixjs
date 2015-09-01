@@ -11,10 +11,11 @@ export default class Command {
             runContext,
             metricsConfig,
             circuitConfig,
+            requestVolumeRejectionThreshold = HystrixConfig.requestVolumeRejectionThreshold,
             timeout = HystrixConfig.executionTimeoutInMilliseconds,
             fallback = function(error) {return q.reject(error);},
             run = function() {throw new Error("Command must implement run method.")},
-            isErrorHandler = function(error) {return error;},
+            isErrorHandler = function(error) {return error;}
         }) {
         this.commandKey = commandKey;
         this.commandGroup = commandGroup;
@@ -25,6 +26,7 @@ export default class Command {
         this.isError = isErrorHandler;
         this.metricsConfig = metricsConfig;
         this.circuitConfig = circuitConfig;
+        this.requestVolumeRejectionThreshold = requestVolumeRejectionThreshold;
     }
 
     get circuitBreaker() {
@@ -36,6 +38,9 @@ export default class Command {
     }
 
     execute() {
+        if (this.requestVolumeRejectionThreshold != 0 && this.metrics.getCurrentExecutionCount() >= this.requestVolumeRejectionThreshold) {
+            return this.handleFailure(new Error("CommandRejected"));
+        }
         if (this.circuitBreaker.allowRequest()) {
             return this.runCommand.apply(this, arguments);
         } else {
@@ -79,6 +84,8 @@ export default class Command {
         if (this.isError(err)) {
             if (err.message === "CommandTimeOut") {
                 this.metrics.markTimeout();
+            } else if (err.message === "CommandRejected") {
+                this.metrics.markRejected();
             } else {
                 this.metrics.markFailure();
             }

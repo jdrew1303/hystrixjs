@@ -34,6 +34,10 @@ export class CommandMetrics {
         this.rollingCount.increment(RollingNumberEvent.SUCCESS);
     }
 
+    markRejected() {
+        this.rollingCount.increment(RollingNumberEvent.REJECTED);
+    }
+
     markFailure() {
         this.rollingCount.increment(RollingNumberEvent.FAILURE);
     }
