@@ -1,13 +1,13 @@
 {
   "name": "hystrixjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "resilience module for NodeJS applications",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "MIT",
+  "license": "Apache 2.0",
   "devDependencies": {
     "express": "^4.13.3",
     "gulp": "^3.9.0",
