@@ -26,10 +26,10 @@ Since this library targets nodejs application, it is by far not as complex as th
 
 Following diagram shows what happens when a function call is wrapped in a Command
 
-![diagram.png](https://bitbucket.org/repo/zq8Kzy/images/79170045-diagram.png)
+![diagramm.png](https://bitbucket.org/repo/zq8Kzy/images/2583105901-diagramm.png)
 
 The Command is constructed with the help of the CommandsFactory. It expects a unique key and a "run" function, which will be called, when the command is executed. Note: the function must return a Promise.
-The returned object provides an execute() method, which will call the specified "run" function with the passed arguments. Within the execute() method it will check if the circuit breaker is open (or "tripped") and if it is,
+The returned object provides an execute() method, which will call the specified "run" function with the passed arguments. Within the execute() method it will check if the overall request volume threshold has been reached. If the command is already executing a certain amount of requests, the request will be rejected immediately to avoid overloading the downstream service and the fallback will be returned instead. If the threshold is not reached it will check if the circuit breaker is open (or "tripped") and if it is,
 it will forward the execution to the fallback function with the Error("OpenCircuitError"). If the circuit is closed, the command will call the provided "run" function.
 If the function times out or fails, the execution will be forwarded to the fallback method with the Error("CommandTimeOut") or the execution error respectively.
 Per default the fallback function rejects the promise with the passed error. It could however implement a logic to provide a generic response, which does not depend on network calls.
@@ -78,6 +78,7 @@ If it returns null or false, the call will not be marked as failure. An example 
 - *statisticalWindowNumberOfBuckets* - number of buckets within the statistical window
 - *percentileWindowNumberOfBuckets* - number of buckets within the percentile window
 - *percentileWindowLength* - length of the window to keep track of execution times
+- *requestVolumeRejectionThreshold* - maximum number of concurrent requests, which can be executed. Defaults to 0, i.e. no limitation
 - *fallbackTo* - function, which will be executed if the request fails
 
 All of these options have defaults and does not have to be configured. See [HystrixConfig](https://bitbucket.org/igor_sechyn/hystrixjs/src/4cf3ba2dd28eb69481cca384bab21082670c0e00/src/util/HystrixConfig.js) for details. These can be overridden on app startup.
