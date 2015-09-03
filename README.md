@@ -49,7 +49,7 @@ If the volume exceeds the threshold, the circuit will check the health first
 All external communication points should be wrapped within a command. The command factory is the entry point to get the existing or generate a new command.
 
 ```javascript
-
+var CommandsFactory = require('hystrixjs').CommandsFactory;
 var serviceCommand = CommandsFactory.getOrCreate("Service on port :" + service.port + ":" + port)
     .circuitBreakerErrorThresholdPercentage(service.errorThreshold)
     .timeout(service.timeout)
