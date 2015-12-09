@@ -37,11 +37,11 @@ module.exports = function(port) {
         cbs = [],
         commands = [],
         reqs = 0;
-    var isErrorHandler = function(error, response, body) {
+    var isErrorHandler = function(error) {
         if (error) {
             return error;
         }
-        if (response.statusCode == 503) {
+        if (error.statusCode == 503) {
             var unavailableError = new Error();
             unavailableError.name = "ServiceUnavailableError";
             return unavailableError;
@@ -75,7 +75,10 @@ module.exports = function(port) {
             var n = getRandomInt(1, command.service.calls);
             for (var i = 0; i < n; i++) {
                 var url = "http://localhost:" + command.service.port + "/random-sleep/" + command.service.sleep;
-                promises.push(command.execute(url));
+                promises.push(command.execute({
+                    method: "GET",
+                    url: url
+                }));
             }
         });
 
