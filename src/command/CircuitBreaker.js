@@ -49,6 +49,7 @@ class CircuitBreaker {
 
     allowSingleTest() {
         if (this.circuitOpen && ActualTime.getCurrentTime() > this.circuitOpenedOrLastTestedTime + this.circuitBreakerSleepWindowInMilliseconds) {
+            this.circuitOpenedOrLastTestedTime = ActualTime.getCurrentTime();
             return true;
         } else {
             return false;

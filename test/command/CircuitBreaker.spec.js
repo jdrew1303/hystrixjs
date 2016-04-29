@@ -69,6 +69,36 @@ describe ("CircuitBreaker", function() {
         expect(cb.allowRequest()).toBeTruthy();
     });
 
+    it("should allow only one retry after configured sleep window", function() {
+        var options = getCBOptions("Test");
+        var CircuitBreakerFactoryRewired = rewire("../../lib/command/CircuitBreaker");
+        var cb = CircuitBreakerFactoryRewired.getOrCreate(options);
+        var metrics = CommandMetricsFactory.getOrCreate({commandKey: "Test"});
+        metrics.markSuccess();
+        metrics.markFailure();
+        expect(cb.allowRequest()).toBeFalsy();
+
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 1001);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeTruthy();
+
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 1201);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeFalsy();
+        
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 1501);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeFalsy();
+
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 1701);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeFalsy();
+
+        support.fastForwardActualTime(CircuitBreakerFactoryRewired, 2001);
+        expect(cb.isOpen()).toBeTruthy();
+        expect(cb.allowRequest()).toBeTruthy();
+    });
+
     it("should reset metrics after the circuit was closed again", function() {
         var options = getCBOptions("Test");
         var cb = CircuitBreakerFactory.getOrCreate(options);
