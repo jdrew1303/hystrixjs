@@ -2,7 +2,7 @@
 
 [![Build Status](https://semaphoreci.com/api/v1/projects/7e3f7d85-125e-4deb-93f4-dd3f113952a0/517219/badge.svg)](https://semaphoreci.com/igorsechyn/hystrixjs)      
 
-This library is inspired by the by the the Netflix [Hystrix](https://github.com/Netflix/Hystrix/wiki/) module for Java applications, which "is a latency and fault tolerance library designed to isolate points of access to remote systems, services and 3rd party libraries, stop cascading failure and enable resilience in complex distributed systems where failure is inevitable".
+This library is inspired by the Netflix [Hystrix](https://github.com/Netflix/Hystrix/wiki/) module for Java applications, which "is a latency and fault tolerance library designed to isolate points of access to remote systems, services and 3rd party libraries, stop cascading failure and enable resilience in complex distributed systems where failure is inevitable".
 
 ## How does it work?
 
